@@ -67,4 +67,31 @@ describe('loader', function() {
     context.cacheable.should.have.callCount(1)
     context.addDependency.should.have.callCount(1)
   });
+
+	it('should convert JSON objects to Sass maps (from .js file)', function() {
+    context.query = '?path=test/js/objects.js'
+    loader.call(context, someSass)
+      .should.be.eql('$breakpoints:(portraitS:320px,portraitM:360px,portraitL:414px);\n$deepObject:(a:(b:c));\n\n$primary-color: #333;');
+
+    context.cacheable.should.have.callCount(1)
+    context.addDependency.should.have.callCount(1)
+  });
+
+	it('should convert JSON objects to Sass maps (from .js file) with property name', function() {
+    context.query = '?path=test/js/objects.js&p=breakpoints'
+    loader.call(context, someSass)
+      .should.be.eql('$portraitS:320px;\n$portraitM:360px;\n$portraitL:414px;\n\n$primary-color: #333;');
+
+    context.cacheable.should.have.callCount(1)
+    context.addDependency.should.have.callCount(1)
+  });
+
+	it('should convert JSON objects to Sass maps (from .js file) with deeo property name', function() {
+    context.query = '?path=test/js/objects.js&p=deepObject.a'
+    loader.call(context, someSass)
+      .should.be.eql('$b:c;\n\n$primary-color: #333;');
+
+    context.cacheable.should.have.callCount(1)
+    context.addDependency.should.have.callCount(1)
+  });
 });

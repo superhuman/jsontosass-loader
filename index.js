@@ -4,13 +4,40 @@ var loaderUtils = require("loader-utils");
 var fs = require('fs');
 var path = require("path");
 module.exports = function(content) {
-  var query = loaderUtils.parseQuery(this.query).path;
-  var queryString = JSON.stringify(query);
-  var varPath = queryString.replace(/["']/g, '');
-  this.cacheable();
-  var contentPath = path.resolve(varPath);
-  this.addDependency(contentPath);
-  var obj = JSON.parse(fs.readFileSync(contentPath, 'utf8'));
+  var query = loaderUtils.parseQuery(this.query);
+
+	var contentPath = path.resolve(query.path);
+  var parsedContentPath = path.parse(path.resolve(query.path));
+	var obj = {};
+
+	if(parsedContentPath.ext === ".json") {
+		obj = JSON.parse(fs.readFileSync(contentPath, 'utf8'));
+	} else
+	if(parsedContentPath.ext === ".js") {
+		obj = JSON.parse(JSON.stringify(require(contentPath)));
+
+		var propName = false
+			|| query.p
+			|| query.prop
+			|| query.props
+			|| query.property
+			|| query.properties
+			|| query.propName
+			|| query.propNames
+			|| false;
+
+		if(propName) {
+			var propNames = propName.split(".");
+			propNames.forEach(function(prop) {
+				obj = obj[prop];
+			});
+		}
+	} else {
+		throw "Invalid jsontosass file type (" + parsedContentPath.ext + ")";
+	}
+
+	this.cacheable();
+	this.addDependency(contentPath);
 
 
   function jsonToSassVars (obj, indent) {
