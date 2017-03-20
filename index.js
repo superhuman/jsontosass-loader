@@ -4,7 +4,8 @@ var loaderUtils = require("loader-utils");
 var fs = require('fs');
 var path = require("path");
 module.exports = function(content) {
-  var query = loaderUtils.parseQuery(this.query);
+
+  var query = loaderUtils.getOptions(this);
 
 	var contentPath = path.resolve(query.path);
   var parsedContentPath = path.parse(path.resolve(query.path));
